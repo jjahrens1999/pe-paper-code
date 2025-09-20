@@ -3,9 +3,9 @@ from typing import List, Any, Dict
 from crdt.pncounter import PNCounter
 from crdt.updateevent import UpdateEvent
 
-CRDT_SIZE = 30
+CRDT_SIZE = 5
 
-class CombinedCrdt:
+class CompoundCrdt:
     def __init__(self, nreplicas: int, counters: List[PNCounter] = None):
         if counters is None:
             self._counters = [PNCounter(nreplicas) for _ in range(CRDT_SIZE)]
@@ -42,7 +42,7 @@ class CombinedCrdt:
 
     @classmethod
     def from_json(cls, json_obj: Any, nreplicas: int):
-        return CombinedCrdt(nreplicas, [PNCounter.from_json(counter, nreplicas) for counter in json_obj["counters"]])
+        return CompoundCrdt(nreplicas, [PNCounter.from_json(counter, nreplicas) for counter in json_obj["counters"]])
 
     def to_json(self) -> Dict:
         return {"counters": [counter.to_json() for counter in self._counters]}

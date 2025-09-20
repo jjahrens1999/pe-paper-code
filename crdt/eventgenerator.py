@@ -10,7 +10,6 @@ class UpdateEventGenerator:
         self._replication_id = replication_id
 
     def new_update(self) -> UpdateEvent:
-        event_type = None
         if random.random() >= 0.5:
             event_type = "increment"
         else:

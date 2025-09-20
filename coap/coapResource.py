@@ -12,4 +12,6 @@ class CoAPResource(resource.Resource):
     async def render_put(self, request):
         print("PUT payload: %s" % request.payload)
         self._update_backlog.append(json.loads(request.payload.decode("utf-8")))
-        return Message(code=68)
+        if request.mtype == 0:
+            return Message(mtype=2, code=68)
+        return NoResponse
