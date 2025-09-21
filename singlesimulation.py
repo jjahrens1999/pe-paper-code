@@ -30,12 +30,11 @@ async def run_single_simulation(request_mode: str, sync_mode: str, replication_a
     if not os.path.exists(json_dir_name):
         os.makedirs(json_dir_name)
 
-    # Configure the logger
     logging.basicConfig(
-        filename=logfile_name,  # Specify the log file name
+        filename=logfile_name,
         filemode="a",
-        level=logging.INFO,  # Set the logging level to INFO
-        format='%(asctime)s - %(levelname)s - %(message)s'  # Define the log message format
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
     )
 
     logging.info(f'Starting simulation with name {name} repeat {nrepeat} at timestamp {time.time()}')
@@ -64,7 +63,6 @@ async def run_single_simulation(request_mode: str, sync_mode: str, replication_a
 
     # main update loop
     for i in range(20):
-        print(f"loop step {i}")
         for _ in range(5):
             update = event_generator.new_update()
             crdt.apply_update(update)
@@ -79,15 +77,11 @@ async def run_single_simulation(request_mode: str, sync_mode: str, replication_a
         await asyncio.sleep(1)
         apply_updates(sync_mode, update_backlog, crdt, nreplicas)
         write_json(json_dir_name, i + 1, crdt.to_json())
-        print(json.dumps(crdt.to_json(), indent=4))
 
     # be sure to catch every update
     await asyncio.sleep(7)
     apply_updates(sync_mode, update_backlog, crdt, nreplicas)
     write_json(json_dir_name, "final", crdt.to_json())
-    print(json.dumps(crdt.to_json(), indent=4))
-    print(update_backlog)
-    print("7 sec over")
     await server_context.shutdown()
     logging.info(f'Ending simulation with name {name} repeat {nrepeat} at timestamp {time.time()}')
 
@@ -99,7 +93,6 @@ def apply_updates(sync_mode: str, update_backlog: List[Any], crdt: CompoundCrdt,
     while len(update_backlog) > 0:
         if sync_mode == "operation":
             remote_update = update_backlog.pop()
-            print(remote_update)
             crdt.apply_update(UpdateEvent.from_json(remote_update))
         elif sync_mode == "state":
             remote_state = update_backlog.pop()
@@ -115,4 +108,4 @@ if __name__ == "__main__":
     parser.add_argument("replication_id")
     parser.add_argument("replication_addrs", nargs='+')
     args = parser.parse_args()
-    asyncio.run(run_single_simulation(args.request_mode, args.sync_mode, args.replication_addrs, int(args.replication_id), args.name, int(args.nrepeats)))
+    asyncio.run(run_single_simulation(args.request_mode, args.sync_mode, args.replication_addrs, args.replication_id, args.name, int(args.nrepeats)))
